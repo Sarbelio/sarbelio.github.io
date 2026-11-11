@@ -29,6 +29,7 @@
   html,body{overscroll-behavior-y:none}
   .tip,.shop,.dish h3{-webkit-user-select:text;user-select:text}
   html{font-size:18px}
+  html.big{font-size:21px !important}
   body{margin:0;background:var(--bg);color:var(--ink);font-family:'Noto Sans KR',system-ui,sans-serif;line-height:1.55}
   .wrap{max-width:640px;margin:0 auto;padding:calc(24px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) calc(70px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left))}
   h1{font-size:1.75rem;font-weight:900;margin:0 0 4px;letter-spacing:-.5px}
@@ -173,6 +174,25 @@
   .recent:empty{display:none}
 
   [hidden]{display:none !important}
+  .hometop{position:absolute;top:calc(14px + env(safe-area-inset-top));right:calc(16px + env(safe-area-inset-right));z-index:3}
+  .bigbtn{border:1px solid rgba(255,255,255,.6);background:rgba(255,255,255,.5);color:inherit;border-radius:999px;padding:7px 12px;font:inherit;font-size:.85rem;font-weight:800;cursor:pointer;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+  body.isnight .bigbtn{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.22)}
+  .bigbtn.on{background:#2b2622;color:#fff;border-color:#2b2622}
+  .statpill{display:block;margin:12px auto 0;border:none;border-radius:999px;padding:10px 16px;background:var(--pill,rgba(255,255,255,.55));color:inherit;font:inherit;font-size:.98rem;cursor:pointer;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+  .statpill::after{content:' ›';opacity:.6}
+  .stiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+  .stile{border-radius:16px;padding:14px;text-align:center}
+  .stile span{display:block;font-size:.95rem;font-weight:700}
+  .stile b{display:block;font-size:2.2rem;font-weight:900;line-height:1.2}
+  .stile b small{font-size:1rem;font-weight:700;margin-left:2px}
+  .stile.cook{background:#e2f0e5;color:#2f6b42} .stile.order{background:#fbeadb;color:#b9561a}
+  .sbar{height:12px;border-radius:99px;background:#f3c6a3;overflow:hidden;margin-top:14px}
+  .sbar i{display:block;height:100%;background:#3d7a4f;border-radius:99px}
+  .sbarl{display:flex;justify-content:space-between;font-size:.85rem;color:#7d736a;margin:4px 0 0}
+  .sline{font-size:1rem;margin:12px 0 0 !important}
+  .sline small{color:#7d736a}
+  .stop{margin:0;padding-left:1.4em;font-size:1rem;line-height:1.8}
+  .stop small{color:#7d736a}
   /* 앱 설치 버튼·안내 */
   .installbtn{display:block;margin:22px auto 0;border:none;background:transparent;color:inherit;font:inherit;font-size:.95rem;font-weight:700;text-decoration:underline;text-underline-offset:4px;opacity:.85;cursor:pointer;padding:8px 12px}
   .ibg{position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center}
@@ -270,12 +290,14 @@
 <body class="sky">
 <div class="skyfx" id="skyfx"></div>
 <div class="wrap home" id="v-home">
+  <div class="hometop"><button type="button" class="bigbtn" id="bigBtn">가+ 글자 크게</button></div>
   <p class="date" id="date"></p>
   <h1>오늘</h1>
   <a class="pick cook" id="toCook" href="#"><span class="pic"><span class="pe">🍲</span></span><span class="ptxt"><b>뭐 해먹지?</b><small>냉장고 재료로 집밥 추천</small></span><span class="parr" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span></a>
   <a class="pick order" id="toOrder" href="#"><span class="pic"><span class="pe">🛵</span></span><span class="ptxt"><b>뭐 시키지?</b><small>배달 메뉴 추천</small></span><span class="parr" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span></a>
   <a class="smallpick" id="toGames" href="#games">🎲 오늘은 니가 내라</a>
   <p class="recent" id="recent"></p>
+  <button type="button" class="statpill" id="statBtn" hidden></button>
   <button type="button" class="installbtn" id="installBtn" hidden>📲 앱으로 설치하기</button>
 </div>
 <div class="ibg" id="ibg" hidden><div class="ibox" id="ibox" role="dialog" aria-modal="true"></div></div>
@@ -739,6 +761,91 @@ showView();
   };
 })();
 
+
+// ================= 글자 크게 보기 (세 화면이 같이 기억) =================
+function applyBig(){
+  let on=false; try{ on=localStorage.getItem('dn_big')==='1'; }catch(e){}
+  document.documentElement.classList.toggle('big',on);
+  const b=document.getElementById('bigBtn'); if(b){ b.classList.toggle('on',on); b.setAttribute('aria-pressed',on?'true':'false'); b.textContent = on ? '가− 작게' : '가+ 글자 크게'; }
+}
+document.getElementById('bigBtn').onclick=()=>{
+  const on=document.documentElement.classList.contains('big');
+  try{ localStorage.setItem('dn_big', on?'0':'1'); }catch(e){}
+  applyBig();
+};
+applyBig();
+
+// ================= 이번 달 통계 =================
+function monthStats(offset=0){
+  let H=[]; try{ H=JSON.parse(localStorage.getItem('dn_hist'))||[]; }catch(e){}
+  const now=new Date(), y=now.getFullYear(), m=now.getMonth()+offset;
+  const start=new Date(y,m,1).getTime(), end=new Date(y,m+1,1).getTime();
+  const list=H.filter(h=>h.ts>=start && h.ts<end);
+  const orders=list.filter(h=>h.kind==='order'), cooks=list.filter(h=>h.kind!=='order');
+  const known=orders.filter(h=>h.won>0), spend=known.reduce((a,h)=>a+h.won,0);
+  const cnt={}; list.forEach(h=>h.names.forEach(n=>{ cnt[n]=(cnt[n]||0)+1; }));
+  const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,3);
+  return {month:new Date(y,m,1).getMonth()+1, total:list.length, cook:cooks.length, order:orders.length, spend, unknown:orders.length-known.length, top};
+}
+function paintStatPill(){
+  const s=monthStats(), b=document.getElementById('statBtn');
+  if(!s.total){ b.hidden=true; return; }
+  b.hidden=false; b.innerHTML=`📊 ${s.month}월: 🍲 집밥 <b>${s.cook}</b> · 🛵 배달 <b>${s.order}</b>`;
+}
+document.getElementById('statBtn').onclick=()=>{
+  const s=monthStats(), prev=monthStats(-1);
+  const pc=s.total? Math.round(s.cook/s.total*100) : 0;
+  const won=v=>v.toLocaleString('ko-KR');
+  let cmp='';
+  if(prev.total){
+    const d=s.order-prev.order;
+    cmp = d<0 ? `지난달보다 배달을 <b>${-d}번 덜</b> 시켰어요 👏` : d>0 ? `지난달보다 배달을 <b>${d}번 더</b> 시켰어요` : '지난달과 배달 횟수가 같아요';
+  }
+  const box=document.getElementById('ibox');
+  box.innerHTML=`<div class="ihead">📊 ${s.month}월 우리 집 밥상</div>
+    <div class="stiles"><div class="stile cook"><span>🍲 집밥</span><b>${s.cook}<small>번</small></b></div><div class="stile order"><span>🛵 배달</span><b>${s.order}<small>번</small></b></div></div>
+    <div class="sbar" aria-label="집밥 ${pc}%"><i style="width:${pc}%"></i></div>
+    <p class="sbarl"><span>집밥 ${pc}%</span><span>배달 ${100-pc}%</span></p>
+    ${s.order?`<p class="sline">💸 배달비 약 <b>${won(s.spend)}원</b>${s.unknown?` <small>(금액 모르는 ${s.unknown}번 제외)</small>`:''}</p>`:''}
+    ${cmp?`<p class="sline">${cmp}</p>`:''}
+    ${s.top.length?`<p class="sline" style="margin-bottom:4px">🏆 자주 먹은 메뉴</p><ol class="stop">${s.top.map(([n,c])=>`<li>${n.replace(/[<>&"]/g,'')} <small>${c}번</small></li>`).join('')}</ol>`:''}
+    <p class="inote">"이걸로 할게요"를 누른 것만 세요. 배달비는 메뉴의 대략 가격으로 계산해서 실제와 다를 수 있어요.</p>
+    <button type="button" class="iclose" id="sclose">닫기</button>`;
+  document.getElementById('ibg').hidden=false;
+  document.getElementById('sclose').onclick=()=>{ document.getElementById('ibg').hidden=true; };
+};
+document.getElementById('ibg').addEventListener('click',e=>{ if(e.target.id==='ibg') document.getElementById('ibg').hidden=true; });
+paintStatPill();
+window.addEventListener('pageshow',()=>{ paintStatPill(); applyBig(); });
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ paintStatPill(); applyBig(); } });
+
+const APPNAME='첫화면';
+// ================= 사용 통계 (GoatCounter: 사람을 구분하지 않고 횟수만 셈) =================
+function gcEvent(name){
+  try{
+    if(window.goatcounter && window.goatcounter.count){ window.goatcounter.count({path:name, title:name, event:true}); }
+    else { (window.__gcq=window.__gcq||[]).push(name); }
+  }catch(e){}
+}
+// 통계 스크립트가 늦게 뜨면 쌓아 둔 걸 보냄
+window.addEventListener('load',()=>setTimeout(()=>{ (window.__gcq||[]).splice(0).forEach(gcEvent); },1500));
+function gcTrack(map){
+  // 버튼이 화면에서 바뀌기 전에 세려고 capture 단계에서 잡음
+  document.addEventListener('click',e=>{
+    for(const [sel,name] of map){ const t=e.target.closest && e.target.closest(sel); if(t){ gcEvent(typeof name==='function'?name(t):name); break; } }
+  },true);
+}
+if((window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone===true) gcEvent('설치된 앱으로 실행 - '+APPNAME);
+gcTrack([
+  ['#toCook','첫화면 → 뭐 해먹지'],['#toOrder','첫화면 → 뭐 시키지'],['#toGames','첫화면 → 오늘은 니가 내라'],
+  ['#installBtn','앱 설치 버튼 누름'],['#statBtn','이번 달 통계 보기'],['#bigBtn','글자 크게 버튼'],
+  ['#gtabs button',t=>'게임 탭 - '+t.textContent.trim()],
+  ['#lMake','게임 - 사다리 만들기'],['#wSpin','게임 - 룰렛 돌리기'],['#cShuffle','게임 - 제비뽑기 다시 섞기'],['.ccard','게임 - 제비뽑기 카드 뒤집기'],['#sCopy','게임 - N분의1 결과 복사'],
+]);
+window.addEventListener('appinstalled',()=>gcEvent('앱 설치 완료'));
+window.addEventListener('hashchange',()=>{ if(location.hash==='#games') gcEvent('화면 - 게임'); if(location.hash==='#dishes') gcEvent('화면 - 설거지 게임'); });
+if(location.hash==='#games') gcEvent('화면 - 게임'); if(location.hash==='#dishes') gcEvent('화면 - 설거지 게임');
 </script>
+<script data-goatcounter="https://sarbelio.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </body>
 </html>
