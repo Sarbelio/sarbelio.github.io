@@ -293,7 +293,7 @@
   <div class="hometop"><button type="button" class="bigbtn" id="bigBtn">가+ 글자 크게</button></div>
   <p class="date" id="date"></p>
   <h1>오늘</h1>
-  <a class="pick cook" id="toCook" href="#"><span class="pic"><span class="pe">🍲</span></span><span class="ptxt"><b>뭐 해먹지?</b><small>냉장고 재료로 집밥 추천</small></span><span class="parr" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span></a>
+  <a class="pick cook" id="toCook" href="#"><span class="pic"><span class="pe">🍲</span></span><span class="ptxt"><b>뭐 해먹지?</b><small>집밥 추천 · 일주일 식단표</small></span><span class="parr" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span></a>
   <a class="pick order" id="toOrder" href="#"><span class="pic"><span class="pe">🛵</span></span><span class="ptxt"><b>뭐 시키지?</b><small>배달 메뉴 추천</small></span><span class="parr" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span></a>
   <a class="smallpick" id="toGames" href="#games">🎲 오늘은 니가 내라</a>
   <p class="recent" id="recent"></p>
@@ -424,6 +424,13 @@ function paintDate(){ const d=new Date(); $('date').textContent=`${d.getMonth()+
 
 // ---- 최근에 먹은 것 한 줄 (두 앱이 같이 쓰는 기록) ----
 function paintRecent(){
+  // 식단표에 오늘 메뉴가 있으면 그걸 먼저 보여 줌
+  try{
+    const P=JSON.parse(localStorage.getItem('dn_plan')||'null'), n=new Date();
+    const key=`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;
+    const t=P && P.days && P.days.find(x=>x.date===key);
+    if(t && t.dishes.length && !t.done){ $('recent').innerHTML=`🗓 오늘 저녁 식단: <b>${t.dishes.map(esc).join(' + ')}</b>`; return; }
+  }catch(e){}
   let H=[]; try{ H=JSON.parse(localStorage.getItem('dn_hist'))||[]; }catch(e){}
   const last=H.slice().sort((a,b)=>b.ts-a.ts)[0];
   if(!last){ $('recent').textContent=''; return; }
