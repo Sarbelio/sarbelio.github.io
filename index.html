@@ -148,17 +148,53 @@
   .home{position:relative;z-index:1;min-height:calc(100vh - 100px);min-height:calc(100dvh - 100px);display:flex;flex-direction:column;justify-content:center}
   .date{text-align:center;font-size:1rem;font-weight:500;opacity:.8;margin:0 0 4px;letter-spacing:.5px}
   .home h1{font-size:3rem;font-weight:900;text-align:center;margin:0 0 28px;letter-spacing:-1px}
-  .pick{display:flex;align-items:center;justify-content:center;gap:12px;text-decoration:none;border-radius:24px;padding:34px 20px;margin-top:16px;font-size:1.7rem;font-weight:900;letter-spacing:-.5px;transition:transform .12s;box-shadow:0 8px 24px rgba(0,0,0,.14)}
-  .pick:active{transform:scale(.97)}
-  .pick .em{font-size:2.4rem;line-height:1}
-  .pick.cook{background:#3d7a4f;color:#fff}
-  .pick.order{background:#c8641e;color:#fff}
+  /* 큰 선택 카드: 흰 바탕 + 큰 글씨 + 설명 한 줄 + 화살표 (어르신도 알아보기 쉽게) */
+  .pick{display:flex;align-items:center;gap:16px;text-decoration:none;background:#fff;color:#2b2622;border-radius:22px;padding:20px 16px 20px 18px;margin-top:14px;min-height:96px;box-shadow:0 6px 22px rgba(20,30,45,.10);border:1px solid rgba(0,0,0,.05);transition:transform .12s,background .12s}
+  .pick:active{transform:scale(.98);background:#f7f4ee}
+  .pick:focus-visible{outline:3px solid #2e86de;outline-offset:3px}
+  .pic{flex:none;width:62px;height:62px;border-radius:18px;display:grid;place-items:center}
+  .pic svg{width:34px;height:34px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+  .pick.cook .pic{background:#e2f0e5;color:#2f6b42}
+  .pick.order .pic{background:#fbeadb;color:#b9561a}
+  .ptxt{flex:1;min-width:0;word-break:keep-all}
+  .pe{font-size:2.1rem;line-height:1}
+  .pick.game .pe{font-size:1.5rem}
+  .ptxt b{display:block;font-size:1.5rem;font-weight:800;letter-spacing:-.4px;line-height:1.25}
+  .ptxt small{display:block;font-size:.95rem;color:#6b625a;margin-top:3px;line-height:1.4}
+  .parr{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#f3efe9;color:#6b625a}
+  .parr svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+  .pick.game{min-height:0;padding:14px 16px 14px 18px;margin-top:22px;background:rgba(255,255,255,.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:none;border:1px solid rgba(255,255,255,.7)}
+  .pick.game .pic{width:46px;height:46px;border-radius:14px;background:#efeaf7;color:#5e4596}
+  .pick.game .pic svg{width:26px;height:26px}
+  .pick.game b{font-size:1.15rem}
+  .pick.game small{font-size:.88rem}
+  .pick.game .parr{width:30px;height:30px;background:transparent}
   .recent{text-align:center;margin:26px auto 0;font-size:.98rem;padding:10px 16px;border-radius:999px;background:var(--pill,rgba(255,255,255,.55));backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);max-width:100%}
   .recent:empty{display:none}
 
   [hidden]{display:none !important}
+  /* 앱 설치 버튼·안내 */
+  .installbtn{display:block;margin:22px auto 0;border:none;background:transparent;color:inherit;font:inherit;font-size:.95rem;font-weight:700;text-decoration:underline;text-underline-offset:4px;opacity:.85;cursor:pointer;padding:8px 12px}
+  .ibg{position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center}
+  .ibox{background:#fff;color:#2b2622;width:100%;max-width:520px;border-radius:22px 22px 0 0;padding:22px 20px calc(20px + env(safe-area-inset-bottom));animation:iup .22s ease-out;position:relative}
+  @keyframes iup{from{transform:translateY(30px);opacity:.4}to{transform:none;opacity:1}}
+  .ihead{font-size:1.25rem;font-weight:900;margin-bottom:8px}
+  .ibox p{margin:6px 0;font-size:.98rem;line-height:1.6}
+  .isteps{margin:12px 0 4px;padding-left:1.3em;font-size:1rem;line-height:1.7}
+  .isteps li{margin:8px 0}
+  .isteps small{color:#7d736a}
+  .ico{width:22px;height:22px;vertical-align:-5px;margin:0 2px}
+  .iarrow{text-align:center;font-size:1.8rem;color:#007aff;animation:bob 1s ease-in-out infinite;margin-top:4px}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+  .ibig{display:block;width:100%;margin-top:12px;border:none;border-radius:14px;padding:14px;background:#3d7a4f;color:#fff;font:inherit;font-size:1.05rem;font-weight:800;cursor:pointer}
+  .isub{display:block;width:100%;margin-top:10px;border:1.5px solid #e6ddd1;border-radius:12px;padding:12px;background:transparent;color:#2b2622;font:inherit;font-size:.95rem;cursor:pointer;word-break:break-all}
+  .iclose{display:block;width:100%;margin-top:14px;border:none;border-radius:12px;padding:12px;background:#f7f4ee;color:#2b2622;font:inherit;font-weight:700;cursor:pointer}
+  .inote{color:#7d736a;font-size:.88rem !important}
+  .iurl{font-weight:800;font-size:1.1rem !important;text-align:center;background:#f7f4ee;border-radius:10px;padding:10px}
+
   /* ===== 게임 화면 ===== */
-  .smallpick{display:block;text-align:center;margin:16px auto 0;padding:13px 22px;border-radius:999px;background:rgba(255,255,255,.55);color:inherit;text-decoration:none;font-weight:700;font-size:1.02rem;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.6);width:max-content;max-width:100%}
+  .smallpick{display:block;text-align:center;margin:20px auto 0;padding:13px 22px;border-radius:999px;background:rgba(255,255,255,.55);color:inherit;text-decoration:none;font-weight:700;font-size:1.02rem;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.6);width:max-content;max-width:100%}
+  body.isnight .pick.game{background:rgba(255,255,255,.88)}
   body.isnight .smallpick,body.isnight .homebtn{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.22)}
   .games{position:relative;z-index:1;padding-bottom:calc(60px + env(safe-area-inset-bottom)) !important}
   .gtop{padding-top:4px}
@@ -235,11 +271,13 @@
 <div class="wrap home" id="v-home">
   <p class="date" id="date"></p>
   <h1>오늘</h1>
-  <a class="pick cook" id="toCook" href="#"><span class="em">🍲</span>뭐 해먹지?</a>
-  <a class="pick order" id="toOrder" href="#"><span class="em">🛵</span>뭐 시키지?</a>
+  <a class="pick cook" id="toCook" href="#"><span class="pic"><span class="pe">🍲</span></span><span class="ptxt"><b>뭐 해먹지?</b><small>냉장고 재료로 집밥 추천</small></span><span class="parr" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span></a>
+  <a class="pick order" id="toOrder" href="#"><span class="pic"><span class="pe">🛵</span></span><span class="ptxt"><b>뭐 시키지?</b><small>배달 메뉴 추천</small></span><span class="parr" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span></a>
   <a class="smallpick" id="toGames" href="#games">🎲 오늘은 니가 내라</a>
   <p class="recent" id="recent"></p>
+  <button type="button" class="installbtn" id="installBtn" hidden>📲 앱으로 설치하기</button>
 </div>
+<div class="ibg" id="ibg" hidden><div class="ibox" id="ibox" role="dialog" aria-modal="true"></div></div>
 <div class="wrap games" id="v-games" hidden>
   <div class="gtop"><a class="homebtn" href="#" id="gBack"><span class="chev">‹</span>처음으로</a></div>
   <h1 class="gh1">🎲 오늘은 니가 내라</h1>
@@ -601,6 +639,104 @@ gq('sCopy').onclick=async()=>{
 
 renderPeople();
 showView();
+
+// ================= 📲 앱으로 설치하기 =================
+(function(){
+  const btn=document.getElementById('installBtn'), bg=document.getElementById('ibg'), box=document.getElementById('ibox');
+  const ua=navigator.userAgent;
+  const isIOS=/iPhone|iPad|iPod/.test(ua) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+  const isAndroid=/Android/i.test(ua);
+  const isKakao=/KAKAOTALK/i.test(ua);
+  const isInApp=isKakao || /NAVER\(inapp|Instagram|FBAN|FBAV|Line\/|DaumApps|everytimeApp|BAND\//i.test(ua);
+  const isSafari=isIOS && /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS|Whale|NAVER/.test(ua) && !isInApp;
+  const standalone=(window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone===true;
+  const onSite=/github\.io$/.test(location.hostname) || location.protocol==='file:';
+  let deferred=null;
+
+  // 이미 앱으로 열었거나, Claude 링크에서 볼 때는 버튼을 숨김
+  if(standalone || !onSite){ btn.hidden=true; return; }
+  btn.hidden=false;
+
+  // 안드로이드 Chrome 등: 브라우저가 설치 창을 준비해 주면 저장해 둠
+  window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); deferred=e; });
+  window.addEventListener('appinstalled', ()=>{ deferred=null; btn.hidden=true; showGuide(`<div class="ihead">🎉 설치됐어요!</div><p>홈 화면의 <b>오늘 뭐 먹을까</b> 아이콘으로 열면 돼요.</p>`); });
+
+  const SHARE_SVG='<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>';
+  const PLUS_SVG='<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#2b2622" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="M12 8v8M8 12h8"/></svg>';
+
+  function showGuide(html){ box.innerHTML=html+'<button type="button" class="iclose" id="iclose">닫기</button>'; bg.hidden=false; document.getElementById('iclose').onclick=hide; }
+  function hide(){ bg.hidden=true; }
+  bg.addEventListener('click',e=>{ if(e.target===bg) hide(); });
+
+  function openOutside(){
+    const url=location.href.split('#')[0];
+    if(isKakao){ location.href='kakaotalk://web/openExternal?url='+encodeURIComponent(url); return; }
+    if(isAndroid){ location.href='intent://'+url.replace(/^https?:\/\//,'')+'#Intent;scheme=https;package=com.android.chrome;end'; return; }
+  }
+  async function copyLink(b){
+    try{ await navigator.clipboard.writeText(location.href.split('#')[0]); b.textContent='주소 복사했어요 ✔'; }catch(e){ b.textContent=location.href.split('#')[0]; }
+  }
+
+  btn.onclick=async()=>{
+    // 1) 바로 설치 창을 띄울 수 있으면 그게 제일 쉬움
+    if(deferred){
+      deferred.prompt();
+      const r=await deferred.userChoice.catch(()=>null);
+      deferred=null;
+      if(r && r.outcome==='accepted') btn.hidden=true;
+      return;
+    }
+    // 2) 카톡·네이버 앱 안에서 연 경우: 설치가 안 되니 바깥 브라우저로
+    if(isInApp){
+      const where=isIOS?'Safari':'Chrome';
+      showGuide(`<div class="ihead">📲 ${where}에서 열어야 설치할 수 있어요</div>
+        <p>지금은 ${isKakao?'카카오톡':'앱'} 안의 브라우저라 설치가 안 돼요.</p>
+        ${(isKakao||isAndroid)?`<button type="button" class="ibig" id="iout">${isIOS?"Safari로":"Chrome으로"} 열기</button>`:''}
+        ${isIOS && !isKakao?`<ol class="isteps"><li>오른쪽 아래(또는 위) <b>⋯</b> 버튼을 누르고</li><li><b>Safari로 열기</b>(기본 브라우저로 열기)를 누르세요</li></ol>`:''}
+        <button type="button" class="isub" id="icopy">주소 복사하기</button>
+        <p class="inote">${isIOS?"Safari가":"Chrome이"} 열리면 이 버튼을 다시 눌러 주세요.</p>`);
+      const o=document.getElementById('iout'); if(o) o.onclick=openOutside;
+      document.getElementById('icopy').onclick=e=>copyLink(e.target);
+      return;
+    }
+    // 3) 아이폰
+    if(isIOS){
+      if(!isSafari){
+        showGuide(`<div class="ihead">📲 아이폰은 Safari에서 설치해요</div>
+          <p>지금 브라우저에서는 설치가 안 돼요. 주소를 복사해서 <b>Safari</b>에 붙여넣고 열어 주세요.</p>
+          <button type="button" class="ibig" id="icopy">주소 복사하기</button>`);
+        document.getElementById('icopy').onclick=e=>copyLink(e.target);
+        return;
+      }
+      showGuide(`<div class="ihead">📲 아이폰에 설치하기</div>
+        <ol class="isteps">
+          <li>화면 아래쪽 <b>공유</b> 버튼 ${SHARE_SVG}을 누르세요<br><small>안 보이면 <b>⋯</b> 버튼을 먼저 누르세요</small></li>
+          <li>목록을 내려서 <b>홈 화면에 추가</b> ${PLUS_SVG}를 누르세요</li>
+          <li>오른쪽 위 <b>추가</b>를 누르면 끝!</li>
+        </ol>
+        <div class="iarrow">↓</div>`);
+      return;
+    }
+    // 4) 안드로이드인데 설치 창이 준비 안 된 경우 (삼성 인터넷, 이미 설치됨 등)
+    if(isAndroid){
+      showGuide(`<div class="ihead">📲 안드로이드에 설치하기</div>
+        <ol class="isteps">
+          <li>오른쪽 위 <b>⋮</b> (또는 아래쪽 <b>≡</b>) 메뉴를 누르세요</li>
+          <li><b>앱 설치</b> 또는 <b>홈 화면에 추가</b>를 누르세요</li>
+        </ol>
+        <p class="inote">메뉴에 없으면 이미 설치돼 있을 수 있어요. 홈 화면이나 앱 목록에서 <b>오늘 뭐 먹을까</b>를 찾아보세요.</p>
+        <button type="button" class="isub" id="iout">Chrome으로 열기</button>`);
+      document.getElementById('iout').onclick=openOutside;
+      return;
+    }
+    // 5) 컴퓨터
+    showGuide(`<div class="ihead">📲 휴대폰에서 설치하세요</div>
+      <p>휴대폰에서 이 주소를 열고 <b>앱으로 설치하기</b>를 누르면 돼요.</p>
+      <p class="iurl">${location.host}</p>
+      <p class="inote">컴퓨터 Chrome에서는 주소창 오른쪽의 설치 아이콘으로 설치할 수 있어요.</p>`);
+  };
+})();
+
 </script>
 </body>
 </html>
