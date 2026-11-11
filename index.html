@@ -156,6 +156,7 @@
   .recent{text-align:center;margin:26px auto 0;font-size:.98rem;padding:10px 16px;border-radius:999px;background:var(--pill,rgba(255,255,255,.55));backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);max-width:100%}
   .recent:empty{display:none}
 
+  [hidden]{display:none !important}
   /* ===== 게임 화면 ===== */
   .smallpick{display:block;text-align:center;margin:16px auto 0;padding:13px 22px;border-radius:999px;background:rgba(255,255,255,.55);color:inherit;text-decoration:none;font-weight:700;font-size:1.02rem;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.6);width:max-content;max-width:100%}
   body.isnight .smallpick,body.isnight .homebtn{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.22)}
@@ -286,7 +287,7 @@
   <!-- 제비뽑기 -->
   <div class="gcard gpane" id="g-cards" hidden>
     <p class="gq">제비뽑기 <small>휴대폰을 돌려 가며 한 장씩 뒤집어요</small></p>
-    <div class="stepper"><span>당첨 개수</span><button type="button" id="cMinus">−</button><b id="cWin">1</b><button type="button" id="cPlus">+</button></div>
+    <div class="stepper"><span id="cLabel">당첨 개수</span><button type="button" id="cMinus">−</button><b id="cWin">1</b><button type="button" id="cPlus">+</button></div>
     <div class="cgrid" id="cGrid"></div>
     <p class="wres" id="cRes"></p>
     <button class="gbtn" id="cShuffle">다시 섞기</button>
@@ -380,8 +381,19 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden) paintAll
 window.__sky=paintSky; // 테스트용
 
 // ================= 화면 전환: 첫 화면 ↔ 게임 =================
+let WIN=['💸','당첨'], MODE='';
+function setMode(m){
+  if(m===MODE) return; MODE=m;
+  const d = m==='#dishes';
+  WIN = d ? ['🧽','설거지'] : ['💸','당첨'];
+  document.querySelector('.gh1').textContent = d ? '🧽 설거지는 누가?' : '🎲 오늘은 니가 내라';
+  document.getElementById('cLabel').textContent = `${WIN[1]} 개수`;
+  if(typeof L!=='undefined'){ L.results=[]; L.built=null; document.getElementById('lBoard').innerHTML=''; }
+  if(typeof C!=='undefined') C.deck=null;
+}
 function showView(){
-  const g = location.hash === '#games';
+  const g = location.hash === '#games' || location.hash === '#dishes';
+  if(g) setMode(location.hash);
   document.getElementById('v-home').hidden = g;
   document.getElementById('v-games').hidden = !g;
   window.scrollTo(0,0);
@@ -435,13 +447,13 @@ const shuffle = a => { a=[...a]; for(let i=a.length-1;i>0;i--){ const j=Math.flo
 
 // ================= 사다리 =================
 const L = { results:[], built:null };
-function defaultResults(n, win=1){ return Array.from({length:n},(_,i)=> i<win ? '💸 당첨' : '통과'); }
+function defaultResults(n, win=1){ return Array.from({length:n},(_,i)=> i<win ? `${WIN[0]} ${WIN[1]}` : '통과'); }
 function renderLadderSetup(){
   const n=G.names.length;
   if(n<2 || n>8){ gq('lResults').innerHTML = `<p class="empty">${n>8?'사다리는 8명까지 할 수 있어요.':'참가자를 2명 이상 넣어 주세요.'}</p>`; gq('lMake').disabled=true; gq('lBoard').innerHTML=''; L.built=null; return; }
   gq('lMake').disabled=false;
   if(L.results.length!==n) L.results = defaultResults(n);
-  gq('lResults').innerHTML = `<div class="preset"><button type="button" data-w="1">당첨 1명</button>${n>2?'<button type="button" data-w="2">당첨 2명</button>':''}<button type="button" data-w="order">순서 정하기</button></div>
+  gq('lResults').innerHTML = `<div class="preset"><button type="button" data-w="1">${WIN[1]} 1명</button>${n>2?`<button type="button" data-w="2">${WIN[1]} 2명</button>`:''}<button type="button" data-w="order">순서 정하기</button></div>
     <div class="lres">${L.results.map((r,i)=>`<label><span>${i+1}</span><input data-i="${i}" value="${escG(r)}" maxlength="12"></label>`).join('')}</div>`;
   gq('lResults').querySelectorAll('input').forEach(inp=>inp.oninput=()=>{ L.results[+inp.dataset.i]=inp.value.trim()||'통과'; });
   gq('lResults').querySelectorAll('.preset button').forEach(b=>b.onclick=()=>{
@@ -491,7 +503,7 @@ function runPath(c, fast){
   const dur = fast ? 600 : 1600;
   path.getBoundingClientRect(); path.style.transition=`stroke-dashoffset ${dur}ms linear`; path.style.strokeDashoffset=0;
   setTimeout(()=>{
-    const g=gq('lr'+end), res=B.results[end], win=/당첨|1등/.test(res);
+    const g=gq('lr'+end), res=B.results[end], win=/당첨|1등|설거지/.test(res);
     g.querySelector('rect').setAttribute('fill', COLORS[c%COLORS.length]);
     const t=g.querySelector('text'); t.textContent = res.length>5?res.slice(0,5)+'…':res; t.setAttribute('fill','#fff'); t.setAttribute('font-size', gap<50?10:13);
     if(!fast) gq('lBoard').querySelector('.lhint').innerHTML = `<b>${escG(G.names[c])}</b> → <b>${escG(res)}</b>${win?' 🎉':''}`;
@@ -522,7 +534,7 @@ gq('wSpin').onclick=()=>{
   const g=gq('wRot'); g.getBoundingClientRect(); g.style.transform=`rotate(${W.rot}deg)`;
   setTimeout(()=>{
     const a=((360 - (W.rot%360))%360), i=Math.floor(a/(360/n))%n;
-    W.last=pool[i]; gq('wRes').innerHTML=`🎉 <span style="color:${COLORS[i%COLORS.length]}">${escG(pool[i])}</span> 당첨!`;
+    W.last=pool[i]; gq('wRes').innerHTML=`🎉 <span style="color:${COLORS[i%COLORS.length]}">${escG(pool[i])}</span> ${WIN[1]}!`;
     W.spinning=false; gq('wDrop').hidden = n<=2;
   },4300);
 };
@@ -536,14 +548,14 @@ function renderCards(){
   if(n<2){ gq('cGrid').innerHTML='<p class="empty">참가자를 2명 이상 넣어 주세요. (인원만 골라도 돼요)</p>'; gq('cRes').textContent=''; gq('cWin').textContent=C.win; return; }
   if(!C.deck || C.n!==n) newDeck();
   gq('cWin').textContent=C.win;
-  gq('cGrid').innerHTML=C.deck.map((w,i)=>`<button type="button" class="ccard${C.open.has(i)?' open':''}" data-i="${i}"><div class="in"><div class="b">${i+1}</div><div class="f${w?' win':''}">${w?'<em>💸</em>당첨':'<em>😌</em>통과'}</div></div></button>`).join('');
+  gq('cGrid').innerHTML=C.deck.map((w,i)=>`<button type="button" class="ccard${C.open.has(i)?' open':''}" data-i="${i}"><div class="in"><div class="b">${i+1}</div><div class="f${w?' win':''}">${w?`<em>${WIN[0]}</em>${WIN[1]}`:'<em>😌</em>통과'}</div></div></button>`).join('');
   gq('cGrid').querySelectorAll('.ccard').forEach(b=>b.onclick=()=>{
     const i=+b.dataset.i; if(C.open.has(i)) return; C.open.add(i); b.classList.add('open');
     const left=C.deck.filter((w,k)=>w && !C.open.has(k)).length, opened=C.open.size;
-    gq('cRes').textContent = C.deck[i] ? '💸 당첨!' : (left===0 ? '당첨이 다 나왔어요 🎉' : `통과! 남은 당첨 ${left}장`);
+    gq('cRes').textContent = C.deck[i] ? `${WIN[0]} ${WIN[1]}!` : (left===0 ? `${WIN[1]}이 다 나왔어요 🎉` : `통과! 남은 ${WIN[1]} ${left}장`);
     if(left===0 && opened<n) setTimeout(()=>{ gq('cGrid').querySelectorAll('.ccard').forEach(x=>x.classList.add('open')); C.deck.forEach((_,k)=>C.open.add(k)); },900);
   });
-  if(!C.open.size) gq('cRes').textContent=`${n}장 중 당첨 ${C.win}장`;
+  if(!C.open.size) gq('cRes').textContent=`${n}장 중 ${WIN[1]} ${C.win}장`;
 }
 gq('cMinus').onclick=()=>{ if(C.win>1){ C.win--; newDeck(); renderCards(); } };
 gq('cPlus').onclick=()=>{ if(C.win<Math.max(2,G.names.length)-1){ C.win++; newDeck(); renderCards(); } };
