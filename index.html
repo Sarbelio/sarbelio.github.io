@@ -238,15 +238,16 @@
   .wheelbox{position:relative;width:min(300px,100%);margin:6px auto 0}
   .pointer{position:absolute;left:50%;top:-6px;transform:translateX(-50%);z-index:2;font-size:1.7rem;color:#2b2622;text-shadow:0 2px 0 #fff}
   #wheel{display:block;width:100%;height:auto}
-  #wheel .rot{transition:transform 4.2s cubic-bezier(.17,.89,.22,1)}
+  .wspin{transition:transform 4.2s cubic-bezier(.17,.89,.22,1);will-change:transform;-webkit-transform:rotate(0deg)}
+  .whub{position:absolute;left:50%;top:50%;width:13%;height:13%;transform:translate(-50%,-50%);border-radius:50%;background:#fff;border:3px solid #e6ddd1}
   .wres{text-align:center;font-size:1.3rem;font-weight:900;min-height:1.6em;margin:12px 0 0}
   /* 제비뽑기 */
   .stepper{display:inline-flex;align-items:center;gap:8px;font-size:.95rem}
   .stepper button{width:34px;height:34px;border-radius:50%;border:1.5px solid #e6ddd1;background:#fff;font:inherit;font-size:1.1rem;cursor:pointer;color:#2b2622}
   .stepper b{min-width:1.4em;text-align:center;font-size:1.15rem}
   .cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:10px;margin-top:14px}
-  .ccard{aspect-ratio:3/4;perspective:600px;border:none;background:none;padding:0;cursor:pointer;font:inherit}
-  .ccard .in{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d}
+  .ccard{aspect-ratio:3/4;min-height:110px;perspective:600px;-webkit-perspective:600px;cursor:pointer;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+  .ccard .in{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d;-webkit-transform-style:preserve-3d}
   .ccard.open .in{transform:rotateY(180deg)}
   .ccard .f,.ccard .b{position:absolute;inset:0;border-radius:14px;display:grid;place-items:center;backface-visibility:hidden;-webkit-backface-visibility:hidden;font-weight:900}
   .ccard .b{background:repeating-linear-gradient(45deg,#3d7a4f 0 10px,#357045 10px 20px);color:#fff;font-size:1.5rem;box-shadow:0 4px 10px rgba(0,0,0,.15)}
@@ -315,7 +316,8 @@
     <p class="gq">룰렛 <small>한 명을 뽑아요</small></p>
     <div class="wheelbox">
       <div class="pointer">▼</div>
-      <svg id="wheel" viewBox="-110 -110 220 220"></svg>
+      <div class="wspin" id="wRot"><svg id="wheel" viewBox="-110 -110 220 220"></svg></div>
+      <div class="whub"></div>
     </div>
     <p class="wres" id="wRes"></p>
     <button class="gbtn" id="wSpin">돌리기!</button>
@@ -444,7 +446,7 @@ document.getElementById('gBack').onclick = e => { e.preventDefault(); location.h
 // ================= 참가자 (저장하지 않음) =================
 const G = { names:[], game:'ladder' };
 const gq = id => document.getElementById(id);
-function setNames(list){ G.names = list.slice(0,12); renderPeople(); renderGame(); }
+function setNames(list){ G.names = list.slice(0,12); if(typeof W!=='undefined'){ W.pool=null; W.rot=0; W.spinning=false; } renderPeople(); renderGame(); }
 gq('pForm').addEventListener('submit', e => {
   e.preventDefault();
   const words = gq('pInput').value.split(/[,，、\n]+/).map(s=>s.trim().slice(0,10)).filter(Boolean);
@@ -550,26 +552,26 @@ function runPath(c, fast){
 
 // ================= 룰렛 =================
 const W = { rot:0, pool:null, spinning:false };
-function wheelPool(){ return W.pool && W.pool.every(x=>G.names.includes(x)) ? W.pool : (W.pool=[...G.names]); }
+function wheelPool(){ return (W.pool && W.pool.length>=2 && W.pool.every(x=>G.names.includes(x))) ? W.pool : (W.pool=[...G.names]); }
 function renderWheel(){
   const pool=wheelPool(), n=pool.length;
   gq('wSpin').disabled = n<2; gq('wDrop').hidden = true;
   if(n<2){ gq('wheel').innerHTML=`<circle r="100" fill="#efe8de"/><text text-anchor="middle" y="5" font-size="12" fill="#7d736a">참가자를 2명 이상 넣어 주세요</text>`; gq('wRes').textContent=''; return; }
   const a=360/n, rad=d=>(d-90)*Math.PI/180, P=(r,d)=>[r*Math.cos(rad(d)), r*Math.sin(rad(d))];
-  let s=`<g class="rot" id="wRot" style="transform:rotate(${W.rot}deg)">`;
+  let s=`<g>`; gq('wRot').style.transition='none'; gq('wRot').style.transform=`rotate(${W.rot}deg)`;
   pool.forEach((nm,i)=>{
     const [x1,y1]=P(100,i*a), [x2,y2]=P(100,(i+1)*a), mid=i*a+a/2, [tx,ty]=P(62,mid);
     s+=`<path d="M0,0 L${x1},${y1} A100,100 0 ${a>180?1:0},1 ${x2},${y2} Z" fill="${COLORS[i%COLORS.length]}" stroke="#fff" stroke-width="2"/>`;
     s+=`<text x="${tx}" y="${ty}" transform="rotate(${mid} ${tx} ${ty})" text-anchor="middle" dominant-baseline="middle" font-size="${n>8?10:13}" font-weight="800" fill="#fff">${escG(nm.length>6?nm.slice(0,6)+'…':nm)}</text>`;
   });
-  s+=`</g><circle r="14" fill="#fff" stroke="#e6ddd1" stroke-width="3"/>`;
+  s+=`</g>`;
   gq('wheel').innerHTML=s;
 }
 gq('wSpin').onclick=()=>{
   const pool=wheelPool(), n=pool.length; if(n<2 || W.spinning) return;
   W.spinning=true; gq('wRes').textContent='두구두구… 🥁'; gq('wDrop').hidden=true;
   W.rot += 360*5 + Math.random()*360;
-  const g=gq('wRot'); g.getBoundingClientRect(); g.style.transform=`rotate(${W.rot}deg)`;
+  const g=gq('wRot'); g.style.transition=''; g.getBoundingClientRect(); requestAnimationFrame(()=>{ g.style.transform=`rotate(${W.rot}deg)`; });
   setTimeout(()=>{
     const a=((360 - (W.rot%360))%360), i=Math.floor(a/(360/n))%n;
     W.last=pool[i]; gq('wRes').innerHTML=`🎉 <span style="color:${COLORS[i%COLORS.length]}">${escG(pool[i])}</span> ${WIN[1]}!`;
@@ -586,18 +588,18 @@ function renderCards(){
   if(n<2){ gq('cGrid').innerHTML='<p class="empty">참가자를 2명 이상 넣어 주세요. (인원만 골라도 돼요)</p>'; gq('cRes').textContent=''; gq('cWin').textContent=C.win; return; }
   if(!C.deck || C.n!==n) newDeck();
   gq('cWin').textContent=C.win;
-  gq('cGrid').innerHTML=C.deck.map((w,i)=>`<button type="button" class="ccard${C.open.has(i)?' open':''}" data-i="${i}"><div class="in"><div class="b">${i+1}</div><div class="f${w?' win':''}">${w?`<em>${WIN[0]}</em>${WIN[1]}`:'<em>😌</em>통과'}</div></div></button>`).join('');
+  gq('cGrid').innerHTML=C.deck.map((w,i)=>`<div role="button" tabindex="0" class="ccard${C.open.has(i)?' open':''}" data-i="${i}"><div class="in"><div class="b">${i+1}</div><div class="f${w?' win':''}">${w?`<em>${WIN[0]}</em>${WIN[1]}`:'<em>😌</em>통과'}</div></div></div>`).join('');
   gq('cGrid').querySelectorAll('.ccard').forEach(b=>b.onclick=()=>{
     const i=+b.dataset.i; if(C.open.has(i)) return; C.open.add(i); b.classList.add('open');
     const left=C.deck.filter((w,k)=>w && !C.open.has(k)).length, opened=C.open.size;
     gq('cRes').textContent = C.deck[i] ? `${WIN[0]} ${WIN[1]}!` : (left===0 ? `${WIN[1]}이 다 나왔어요 🎉` : `통과! 남은 ${WIN[1]} ${left}장`);
-    if(left===0 && opened<n) setTimeout(()=>{ gq('cGrid').querySelectorAll('.ccard').forEach(x=>x.classList.add('open')); C.deck.forEach((_,k)=>C.open.add(k)); },900);
+    if(left===0) setTimeout(()=>{ gq('cGrid').querySelectorAll('.ccard').forEach(x=>x.classList.add('open')); C.deck.forEach((_,k)=>C.open.add(k)); gq('cShuffle').textContent='한 판 더! 다시 섞기'; gq('cShuffle').scrollIntoView({behavior:'smooth',block:'center'}); },900);
   });
   if(!C.open.size) gq('cRes').textContent=`${n}장 중 ${WIN[1]} ${C.win}장`;
 }
 gq('cMinus').onclick=()=>{ if(C.win>1){ C.win--; newDeck(); renderCards(); } };
 gq('cPlus').onclick=()=>{ if(C.win<Math.max(2,G.names.length)-1){ C.win++; newDeck(); renderCards(); } };
-gq('cShuffle').onclick=()=>{ newDeck(); renderCards(); };
+gq('cShuffle').onclick=()=>{ gq('cShuffle').textContent='다시 섞기'; newDeck(); renderCards(); };
 
 // ================= N분의1 =================
 const S2 = { n:2, x:0, unit:100 };
